@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +42,8 @@ class MainActivity : ComponentActivity() {
     var num1: Double = 0.0
     var num2: Double = 0.0
     var pulsado: Boolean = false
+    var comillado: Boolean = false
+    var contador: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -79,9 +84,28 @@ class MainActivity : ComponentActivity() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp)
+                    .height(110.dp)
                     .background(Color.DarkGray)
             ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .weight(1f), contentAlignment = Alignment.CenterEnd
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape),
+                        colors = ButtonDefaults.buttonColors(Color.Magenta),
+                        onClick = {
+
+
+                            }) {
+                        Icon(painter = painterResource(id = Icons.Default.), contentDescription = )
+
+                    }
+                }
 
             }
             Row(
@@ -265,7 +289,18 @@ class MainActivity : ComponentActivity() {
                     }
 
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f), contentAlignment = Alignment.Center
+                ) {
+                    NumButton(num = ",", count, isEnabled = true) { newCount: String ->
+                        count = newCount
 
+
+                    }
+
+                }
 
 
                 Box(
@@ -309,6 +344,8 @@ class MainActivity : ComponentActivity() {
             colors = ButtonDefaults.buttonColors(Color.Magenta),
             enabled = isEnabled,
             onClick = {
+                contador = 0.0
+                comillado = false
                 operacion = tipoOperacion
                 newOperacion(operacion)
                 pulsado = true;}) {
@@ -318,7 +355,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun EqualButton(tipoOperacion: String, isEnabled: Boolean, onKeyPresseded: (String) -> Unit) {
+    fun EqualButton(igual: String, isEnabled: Boolean, onKeyPresseded: (String) -> Unit) {
         Button(
             modifier = Modifier
                 .size(80.dp)
@@ -326,20 +363,27 @@ class MainActivity : ComponentActivity() {
             colors = ButtonDefaults.buttonColors(Color.DarkGray),
             enabled = isEnabled,
             onClick = {
+                println(operacion)
+                when (operacion) {
+                    "+" -> numero = (num1 + num2)
+                    "-" -> numero = (num1 - num2)
+                    "*" -> numero = (num1 * num2)
+                    "/" -> numero = (num1 / num2)
 
-                when (tipoOperacion) {
-                    "+" -> numero = num1 + num2
-                    "-" -> numero = num1 - num2
-                    "*" -> numero = num1 / num2
-                    "/" -> numero = num1 * num2
                     else -> { // Note the block
-                        println("Error")
+                        numero = 0.0
+                        onKeyPresseded("Error")
                     }
                 }
 
+                num1 = numero //Lo igualamos a numero por si queremos continuar realizando operaciones.
+                num2 = 0.0
+                contador = 0.0
+                comillado = false
+
                 onKeyPresseded(numero.toString())
                 pulsado = false}) {
-            Text(text = tipoOperacion)
+            Text(text = igual)
 
         }
     }
@@ -359,23 +403,37 @@ class MainActivity : ComponentActivity() {
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(Color.Blue),
             onClick = {
-                if (pulsado == false) {
-                    if (num1.equals(0.0)) {
-                        num1 = num.toDouble()
-                    } else {
-                        num1 *= 10.0
-                        num1 += num.toDouble()
-                    }
-                    localCount = num1.toString()
+                if(num.equals(",")){
+                    comillado = true;
+                }else{
+                    if (pulsado == false) {
+                        if(comillado == true){
+                            contador += 1.0
+                            num1 += (num.toDouble()/Math.pow(10.0, contador))
 
-                } else {
-                    if (num2.equals(0.0)) {
-                        num2 = num.toDouble()
+                        }else if(count.equals(0.0)){
+                            num1 = num.toDouble()
+                        }else {
+                            num1 *= 10.0
+                            num1 += num.toDouble()
+                        }
+                        println(num1.toString())
+                        localCount = num1.toString()
+
                     } else {
-                        num2 *= 10.0
-                        num2 += num.toDouble()
+                        if(comillado == true){
+                            contador += 1.0
+                            num2 += (num.toDouble()/Math.pow(10.0, contador))
+
+                        }else if(num2.equals(0.0)) {
+                        num2 = num.toDouble()
+
+                        }else {
+                            num2 *= 10.0
+                            num2 += num.toDouble()
+                        }
+                        localCount = num2.toString()
                     }
-                    localCount = num2.toString()
                 }
                 onCountChanged(localCount)
 
@@ -383,6 +441,7 @@ class MainActivity : ComponentActivity() {
             Text(text = num)
         }
     }
+
 
     @Composable
     fun Resultado(numero: String) {
