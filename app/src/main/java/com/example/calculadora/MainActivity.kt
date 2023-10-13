@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,8 +67,10 @@ class MainActivity : ComponentActivity() {
             ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .background(Color.LightGray)
+                    .fillMaxWidth()
+                    .padding(20.dp)
+
 
             ) {
                 Box(
@@ -78,13 +80,12 @@ class MainActivity : ComponentActivity() {
                         .weight(1f),
                 ) {
                     Resultado(count)
-
                 }
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp)
+                    .wrapContentHeight()
                     .background(Color.DarkGray)
             ) {
                 Box(
@@ -95,32 +96,36 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Button(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(65.dp)
                             .clip(CircleShape),
-                        colors = ButtonDefaults.buttonColors(Color.Magenta),
+                        colors = ButtonDefaults.buttonColors(Color.Red),
                         onClick = {
-
-
+                            borrarDigito(count){ newCount: String -> count = newCount}
                             }) {
-                        Icon(painter = painterResource(id = Icons.Default.), contentDescription = )
+
+                        Icon( imageVector = Icons.Default.ArrowBack, contentDescription = "Eliminar", modifier= Modifier.fillMaxSize(1F))
 
                     }
                 }
 
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.LightGray)
-                    .padding(0.dp, 10.dp, 0.dp, 0.dp)
                     .weight(1f)
+                    .padding(0.dp, 20.dp, 0.dp, 0.dp)
+                    ,
+
+
 
             ) {
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f), contentAlignment = Alignment.Center
+                        .weight(1f), contentAlignment = Alignment.BottomCenter
                 ) {
                     NumButton(num = "1", count, isEnabled = true) { newCount: String ->
                         count = newCount
@@ -333,6 +338,13 @@ class MainActivity : ComponentActivity() {
         }
 
 
+    }
+
+
+    fun borrarDigito(total: String, newCount: (String) -> Unit){
+        var resultante = total.dropLast(1)
+        numero = resultante.toDouble()
+        newCount(resultante)
     }
 
     @Composable
