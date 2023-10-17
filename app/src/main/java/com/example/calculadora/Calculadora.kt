@@ -575,20 +575,17 @@ class Calculadora : ComponentActivity() {
                             if (comillado == true) {
                                 contador++
                                 var aux: Double
-                                /*
-                                    Transformar el número que hayamos seleccionado a su posición correspondiente
-                                    mediante división entre potencias de 10.
-                                 */
+
 
                                 aux = num.toDouble()
                                 potencia = 10.0.pow(contador)
                                 aux /= potencia
-                                num2 += aux // Se lo sumamos al número completo que tenemos
+                                num2 += aux
 
                                 //Este fragmento sirve para eliminar unos decimales que surgen aleatoriamente.
                                 var partes = num2.toString().split(".")
                                 if (partes.size > 1) {
-                                    //El tamaño de los numeros enteros + la coma decimal
+
                                     if (partes[1].length > contador) {
                                         var num2String = num2.toString()
                                         num2String = num2String.substring(
