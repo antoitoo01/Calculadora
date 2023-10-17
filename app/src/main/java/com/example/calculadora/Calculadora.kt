@@ -66,7 +66,7 @@ class Calculadora : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var viewModel: CalculadoraViewModel = CalculadoraViewModel()
+            val viewModel = CalculadoraViewModel()
             PantallaPrincipal(viewModel)
         }
     }
@@ -111,7 +111,7 @@ class Calculadora : ComponentActivity() {
                         .weight(1f)
                 )
                 {
-                    borrarTodo() { newCount: String -> viewModel.count = newCount }
+                    BorrarTodo() { newCount: String -> viewModel.count = newCount }
                 }
 
                 Box(
@@ -120,7 +120,7 @@ class Calculadora : ComponentActivity() {
                         .padding(10.dp)
                         .weight(1f), contentAlignment = Alignment.CenterEnd
                 ) {
-                    borrarDigito(total = viewModel.count) { newCount: String ->
+                    BorrarDigito(total = viewModel.count) { newCount: String ->
                         viewModel.count = newCount
                     }
                 }
@@ -322,23 +322,24 @@ class Calculadora : ComponentActivity() {
                         .weight(1f), contentAlignment = Alignment.CenterEnd
                 ) {
                     OperationButton("/", viewModel, isEnabled = true) { newOperacion: String ->
-                        actualizarCount("/", viewModel)
+                        actualizarCount( viewModel)
                     }
                 }
             }
         }
     }
 
-    private fun actualizarCount(operacion: String, vmCount: CalculadoraViewModel) {
+    //Función para hacer que las operaciones puedan ser concatenadas
+    private fun actualizarCount( vmCount: CalculadoraViewModel) {
         if (this.pulsado == false) { // Verifica si se ha pulsado ya un OperationButton
-            this.operacion = operacion
+            this.operacion = "/"
         } else {
             calcular(vmCount)
         }
     }
 
     @Composable
-    private fun borrarTodo(newCount: (String) -> Unit) {
+    private fun BorrarTodo(newCount: (String) -> Unit) {
         Button(
             modifier = Modifier
                 .size(75.dp)
@@ -357,7 +358,7 @@ class Calculadora : ComponentActivity() {
     }
 
     @Composable
-    private fun borrarDigito(total: String, newCount: (String) -> Unit) {
+    private fun BorrarDigito(total: String, newCount: (String) -> Unit) {
         var localCount by remember { mutableStateOf(total) }
         Button(
             modifier = Modifier
@@ -365,8 +366,6 @@ class Calculadora : ComponentActivity() {
                 .clip(CircleShape),
             colors = ButtonDefaults.buttonColors(Color(R.color.LightOrange)),
             onClick = {
-
-
                 if (total.isEmpty() || total.isBlank() || total.length == 1 || total.equals("Infinito")) {
                     localCount = "0"
                 } else {
@@ -375,7 +374,7 @@ class Calculadora : ComponentActivity() {
                         || (total.equals("0") || total.equals("-0"))
                     ) {
                         localCount = "0"
-                    } else if (localCount[0].equals(",")) {
+                    } else if (localCount[0] == ',') {
                         localCount = total.dropLast(1)
                         comillado = false
                     } else {
@@ -388,8 +387,8 @@ class Calculadora : ComponentActivity() {
                     num2 = localCount.toDouble()
                 }
                 newCount(localCount)
-
             }) {
+
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Eliminar",
@@ -432,7 +431,7 @@ class Calculadora : ComponentActivity() {
 
     //Esta función auxiliar nos calcula num1 (operacion) num2
     private fun calcular(viewModel: CalculadoraViewModel) {
-        var correcto: Boolean = true
+        var correcto = true
         if (pulsado == false) {
             if (num1.toString().isEmpty() || num1.toString().isBlank()) {
                 viewModel.count = "0.0"
@@ -536,8 +535,14 @@ class Calculadora : ComponentActivity() {
                     if (pulsado == false) {
                         if (comillado == true) {
                             contador++
-
-                            num1 += (num.toDouble() / (10.toDouble().pow(contador)).toInt())
+                            var longitudNum : Int = num1.toString().length
+                            var aux : Double
+                            aux = (num.toDouble() / (10.toDouble().pow(contador)).toInt())
+                            num1+=aux
+                            if(aux.length > (num.length+1)){
+                                aux
+                            }
+                            num1 +=
 
                         } else if (viewModel.count.equals("0.0")) {
                             num1 = num.toDouble()
