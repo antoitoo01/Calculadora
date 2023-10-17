@@ -44,6 +44,7 @@ import kotlin.math.pow
 class CalculadoraViewModel : ViewModel() {
     var count by mutableStateOf("0.0")
 }
+
 /*
     Esta clase sólo es para tener válido el preview ya que CalculadoraView Model de tipo ViewModel(),
     no es un parámetro normal.
@@ -271,7 +272,7 @@ class Calculadora : ComponentActivity() {
                         .weight(1f), contentAlignment = Alignment.CenterEnd
                 ) {
 
-                    OperationButton("*", viewModel, isEnabled = true) { newOperacion: String ->
+                    OperationButton("x", viewModel, isEnabled = true) { newOperacion: String ->
                         operacion = newOperacion
                     }
                 }
@@ -322,7 +323,7 @@ class Calculadora : ComponentActivity() {
                         .weight(1f), contentAlignment = Alignment.CenterEnd
                 ) {
                     OperationButton("/", viewModel, isEnabled = true) { newOperacion: String ->
-                        actualizarCount( viewModel)
+                        actualizarCount(viewModel)
                     }
                 }
             }
@@ -330,7 +331,7 @@ class Calculadora : ComponentActivity() {
     }
 
     //Función para hacer que las operaciones puedan ser concatenadas
-    private fun actualizarCount( vmCount: CalculadoraViewModel) {
+    private fun actualizarCount(vmCount: CalculadoraViewModel) {
         if (this.pulsado == false) { // Verifica si se ha pulsado ya un OperationButton
             this.operacion = "/"
         } else {
@@ -443,7 +444,7 @@ class Calculadora : ComponentActivity() {
             when (operacion) {
                 "+" -> numero = (num1 + num2)
                 "-" -> numero = (num1 - num2)
-                "*" -> numero = (num1 * num2)
+                "x" -> numero = (num1 * num2)
                 "/" -> if (num2 == 0.0 || num2.toString() == ",") {
                     correcto = false
                     reiniciarVariables()
@@ -514,7 +515,6 @@ class Calculadora : ComponentActivity() {
         isEnabled: Boolean,
         onCountChanged: (String) -> Unit
     ) {
-        //var localCount by remember { mutableStateOf(count) }
         Button(
             modifier = Modifier
                 .size(90.dp)
@@ -522,58 +522,101 @@ class Calculadora : ComponentActivity() {
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(Color(R.color.lightGray)),
             onClick = {
-
+                val maximosDecimales = 18
+                var potencia :Double
                 igualado = false
-                if (num.equals(",")) {
-                    if (pulsado) {
-                        viewModel.count = num2.toString()
+
+
+                if (contador < maximosDecimales) {
+                    if (num.equals(",")) {
+                        if (pulsado) { //Si le hemos dado antes a OperationButton, seleccionamos el num2
+                            viewModel.count = num2.toString()
+                        } else {
+                            viewModel.count = num1.toString()
+                        }
+                        comillado = true
                     } else {
-                        viewModel.count = num1.toString()
-                    }
-                    comillado = true
-                } else {
-                    if (pulsado == false) {
-                        if (comillado == true) {
-                            contador++
-                            var longitudNum : Int = num1.toString().length
-                            var aux : Double
-                            aux = (num.toDouble() / (10.toDouble().pow(contador)).toInt())
-                            num1+=aux
-                            if(aux.length > (num.length+1)){
-                                aux
+                        if (pulsado == false) {
+                            if (comillado == true) {
+                                contador++
+                                var aux: Double
+                                /*
+                                    Transformar el número que hayamos seleccionado a su posición correspondiente
+                                    mediante división entre potencias de 10.
+                                 */
+
+                                aux = num.toDouble()
+                                potencia = 10.0.pow(contador)
+                                aux /= potencia
+                                num1 += aux // Se lo sumamos al número completo que tenemos
+
+                                //Este fragmento sirve para eliminar unos decimales que surgen aleatoriamente.
+                                var partes = num1.toString().split(".")
+                                if (partes.size > 1) {
+                                    //El tamaño de los numeros enteros + la coma decimal
+                                    if (partes[1].length > contador) {
+                                        var num1String = num1.toString()
+                                        num1String = num1String.substring(
+                                            0,
+                                            num1String.length - (partes[1].length - contador)
+                                        )
+                                        num1 = num1String.toDouble()
+                                    }
+                                }
+                            } else if (viewModel.count.equals("0.0")) {
+                                num1 = num.toDouble()
+                            } else {
+                                num1 *= 10.0
+                                num1 += num.toDouble()
                             }
-                            num1 +=
+                            viewModel.count = num1.toString()
 
-                        } else if (viewModel.count.equals("0.0")) {
-                            num1 = num.toDouble()
-                        } else {
-                            num1 *= 10.0
-                            num1 += num.toDouble()
+                        } else {    //Lo mismo para el num2
+                            if (comillado == true) {
+                                contador++
+                                var aux: Double
+                                /*
+                                    Transformar el número que hayamos seleccionado a su posición correspondiente
+                                    mediante división entre potencias de 10.
+                                 */
+
+                                aux = num.toDouble()
+                                potencia = 10.0.pow(contador)
+                                aux /= potencia
+                                num2 += aux // Se lo sumamos al número completo que tenemos
+
+                                //Este fragmento sirve para eliminar unos decimales que surgen aleatoriamente.
+                                var partes = num2.toString().split(".")
+                                if (partes.size > 1) {
+                                    //El tamaño de los numeros enteros + la coma decimal
+                                    if (partes[1].length > contador) {
+                                        var num2String = num2.toString()
+                                        num2String = num2String.substring(
+                                            0,
+                                            num2String.length - (partes[1].length - contador)
+                                        )
+                                        num2 = num2String.toDouble()
+                                    }
+                                }
+
+                            } else if (num2.equals(0.0)) {
+                                num2 = num.toDouble()
+
+                            } else {
+                                num2 *= 10.0
+                                num2 += num.toDouble()
+                            }
+                            viewModel.count = num2.toString()
                         }
-                        viewModel.count = num1.toString()
-
-                    } else {
-                        if (comillado == true) {
-                            contador++
-                            num2 += (num.toDouble() / 10.0.pow(contador))
-
-                        } else if (num2.equals(0.0)) {
-                            num2 = num.toDouble()
-
-                        } else {
-                            num2 *= 10.0
-                            num2 += num.toDouble()
-                        }
-                        viewModel.count = num2.toString()
                     }
+                } else {
+                    //No puede añadir más decimales
                 }
                 onCountChanged(viewModel.count)
-
             }) {
             Text(text = num, fontSize = 25.sp)
         }
     }
-
 
     @Composable
     fun Resultado(numero: String) {
